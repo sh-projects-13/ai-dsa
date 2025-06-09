@@ -10,7 +10,6 @@ import {
 } from "../services/auth.service";
 import { hashData, verifyHashedData } from "../utils/hash";
 import { randomInt } from "crypto";
-import axios from "axios";
 import { decodeOtpId, encodeOtpId } from "../utils/otpEncryptor";
 import jwt from "jsonwebtoken";
 import { aj } from "../utils/arcjet";
