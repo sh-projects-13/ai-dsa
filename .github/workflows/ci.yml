@@ -1,0 +1,61 @@
+name: CI - Main Branch Check
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    name: 🛠️ Build & Validate
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: ⬇️ Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Needed for full commit history
+
+      - name: 🟢 Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🧪 Run tests
+        run: npm test
+
+      - name: 🧱 TypeScript check
+        run: npx tsc --noEmit
+
+      - name: 💅 Lint code
+        run: npx eslint . --ext .ts,.tsx
+
+      - name: 🔍 Check for merge conflicts
+        run: |
+          if git diff --check | grep '<<<<<<<'; then
+            echo "❌ Merge conflicts found!"
+            exit 1
+          fi
+
+      - name: 📝 Check commit messages (Conventional Commits)
+        uses: wagoid/commitlint-github-action@v5
+        with:
+          configFile: commitlint.config.js
+
+      - name: 🛡️ Audit for vulnerabilities
+        run: npm audit --audit-level=moderate
+
+      - name: 📁 Build (for deploy test)
+        run: npm run build
+
+      - name: ✅ Success message
+        run: echo "🎉 All checks passed on main!"

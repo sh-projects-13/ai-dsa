@@ -6,9 +6,11 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "test": "echo \"No tests yet\"",
     "check-types": "turbo run check-types"
   },
   "devDependencies": {
+    "eslint": "^9.28.0",
     "prettier": "^3.5.3",
     "turbo": "^2.5.4",
     "typescript": "5.8.2"
