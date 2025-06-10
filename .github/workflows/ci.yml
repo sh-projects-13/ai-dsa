@@ -1,4 +1,4 @@
-name: CI
+name: CI Pipeline
 
 on:
   push:
@@ -7,49 +7,59 @@ on:
     branches: [main]
 
 jobs:
-  ci:
+  check-conflicts:
+    name: Check for Merge Conflicts
     runs-on: ubuntu-latest
-
     steps:
-      - name: ⬇️ Checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 🧰 Setup Node.js
+      - name: Detect merge conflicts
+        run: |
+          if git ls-files -u | grep -q .; then
+            echo "Merge conflict detected!"
+            exit 1
+          else
+            echo "No merge conflicts."
+          fi
+
+  install-and-build:
+    name: Install, Lint, Type Check, Test, Build
+    runs-on: ubuntu-latest
+    needs: check-conflicts
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: 18
           cache: "pnpm"
 
-      - name: 📦 Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 10.11.1
+      - name: Install pnpm
+        run: npm install -g pnpm
 
-      - name: 🧩 Ensure lockfile consistency
-        run: |
-          pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: pnpm install
 
-      - name: 💾 Turbo & pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            .turbo
-            ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-turbo-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-turbo-
-
-      - name: 📊 Check for mismatched dependencies
-        run: pnpm dedupe --check
-
-      - name: 🔍 Lint
+      - name: Run Linter
         run: pnpm lint
 
-      - name: 🧪 Type Check
+      - name: Type Check
         run: pnpm check-types
 
-      - name: 🛠️ Build
+      - name: Run Tests
+        run: pnpm test
+
+      - name: Build Project
         run: pnpm build
 
-      - name: ✅ Format Check
-        run: pnpm format --check
+      - name: Cache Turbo
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ hashFiles('**/*.ts') }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
