@@ -1,61 +1,55 @@
-name: CI - Main Branch Check
+name: CI
 
 on:
   push:
-    branches: ["main"]
+    branches: [main]
   pull_request:
-    branches: ["main"]
+    branches: [main]
 
 jobs:
-  build:
-    name: 🛠️ Build & Validate
+  ci:
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        shell: bash
 
     steps:
       - name: ⬇️ Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: 🧰 Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          fetch-depth: 0 # Needed for full commit history
+          node-version: "18"
+          cache: "pnpm"
 
-      - name: 🟢 Setup Node
-        uses: actions/setup-node@v3
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v2
         with:
-          node-version: 20
-          cache: "npm"
+          version: 10.11.1
 
-      - name: 📦 Install dependencies
-        run: npm ci
-
-      - name: 🧪 Run tests
-        run: npm test
-
-      - name: 🧱 TypeScript check
-        run: npx tsc --noEmit
-
-      - name: 💅 Lint code
-        run: npx eslint . --ext .ts,.tsx
-
-      - name: 🔍 Check for merge conflicts
+      - name: 🧩 Ensure lockfile consistency
         run: |
-          if git diff --check | grep '<<<<<<<'; then
-            echo "❌ Merge conflicts found!"
-            exit 1
-          fi
+          pnpm install --frozen-lockfile
 
-      - name: 📝 Check commit messages (Conventional Commits)
-        uses: wagoid/commitlint-github-action@v5
+      - name: 💾 Turbo & pnpm cache
+        uses: actions/cache@v4
         with:
-          configFile: commitlint.config.js
+          path: |
+            .turbo
+            ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-turbo-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-turbo-
 
-      - name: 🛡️ Audit for vulnerabilities
-        run: npm audit --audit-level=moderate
+      - name: 📊 Check for mismatched dependencies
+        run: pnpm dedupe --check
 
-      - name: 📁 Build (for deploy test)
-        run: npm run build
+      - name: 🔍 Lint
+        run: pnpm lint
 
-      - name: ✅ Success message
-        run: echo "🎉 All checks passed on main!"
+      - name: 🧪 Type Check
+        run: pnpm check-types
+
+      - name: 🛠️ Build
+        run: pnpm build
+
+      - name: ✅ Format Check
+        run: pnpm format --check
