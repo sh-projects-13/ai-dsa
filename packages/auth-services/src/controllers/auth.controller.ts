@@ -1,7 +1,7 @@
 import { Request, RequestHandler, Response } from "express";
 import {
   checkIfUnverifiedUserExistsService,
-  checkIfUsernameExistsService,
+  checkIfUsernameisAvailibleService,
   checkIfVerifiedUserExistsService,
   getUnverifiedUserDataService,
   getVerifiedUserDataByEmailService,
@@ -14,7 +14,7 @@ import { decodeOtpId, encodeOtpId } from "../utils/otpEncryptor";
 import jwt from "jsonwebtoken";
 import { aj } from "../utils/arcjet";
 import { generateAccessAndRefereshTokens } from "../utils/jwtTokens";
-import { sendOtpEmail } from "../utils/email";
+import { sendNewUserOtpEmail } from "../utils/email";
 
 interface iRegisterUser {
   name: string;
@@ -71,12 +71,13 @@ export const checkUsernameAvailability: RequestHandler = async (
   res: Response
 ) => {
   const { username } = req.body;
+  // const username = req.body.username;
 
   if (!username) {
     res.status(400).json({ message: "Username is required." });
   }
 
-  const isUsernameAvailable = await checkIfUsernameExistsService(username);
+  const isUsernameAvailable = await checkIfUsernameisAvailibleService(username);
 
   if (isUsernameAvailable) {
     res.status(200).json({ message: "Username is available." });
@@ -126,6 +127,7 @@ export const registerUnverifiedUser: RequestHandler = async (
 
   const hashedPassword = await hashData(password);
   const otp = randomInt(100000, 999999).toString();
+  const otp_hash = await hashData(otp);
 
   const newUnverifiedUser: iUnverifiedUser =
     await unverifiedUserRegisterService(
@@ -133,7 +135,7 @@ export const registerUnverifiedUser: RequestHandler = async (
       name,
       username,
       hashedPassword,
-      otp
+      otp_hash
     );
 
   const otpUrl = encodeOtpId(newUnverifiedUser.id);
@@ -144,7 +146,7 @@ export const registerUnverifiedUser: RequestHandler = async (
     otpUrl,
   };
 
-  await sendOtpEmail(emailData);
+  await sendNewUserOtpEmail(emailData);
 
   res.status(201).json(newUnverifiedUser);
 };

@@ -48,7 +48,7 @@ export const verifiedUserRegistrationService = async (
 };
 
 // Check if username exists in the database
-export const checkIfUsernameExistsService = async (username: string) => {
+export const checkIfUsernameisAvailibleService = async (username: string) => {
   const existingUsers = await db
     .select()
     .from(unverifiedUsers)
