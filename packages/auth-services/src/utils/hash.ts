@@ -1,7 +1,8 @@
 import bcrypt from "bcryptjs";
+import { config } from "../conf/config";
 
 export const hashData = async (plain: string) => {
-  const salt = await bcrypt.genSalt(Number(process.env.PASSWORD_SALT!));
+  const salt = await bcrypt.genSalt(config.passwordSalt);
   return await bcrypt.hash(plain, salt);
 };
 

@@ -1,17 +1,14 @@
 import express from "express";
 import cors from "cors";
 import { errorHandler } from "./middleware/errorHandler";
-
-// Environment Variables
-import dotenv from "dotenv";
-dotenv.config({ path: "../../.env" });
+import { config } from "./conf/config";
 
 const app = express();
-const PORT = process.env.AUTH_SERVICE_PORT || 4001;
+const PORT = config.port || 4001;
 
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: config.corsOrigin,
     credentials: true,
   })
 );
