@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { updateRefreshandAccessTokenService } from "../services/auth.service";
+import { config } from "../conf/config";
 
 // User interface
 interface iUser {
@@ -20,8 +21,8 @@ const generateAccessToken = (user: iUser) => {
       email: user.email,
       username: user.username,
     },
-    process.env.ACCESS_TOKEN_SECRET!,
-    { expiresIn: Number(process.env.ACCESS_TOKEN_EXPIRY) }
+    config.accessTokenSecret,
+    { expiresIn: config.accessTokenExpiry }
   );
 };
 
@@ -31,8 +32,8 @@ const generateRefreshToken = (id: string) => {
     {
       id: id,
     },
-    process.env.REFRESH_TOKEN_SECRET!,
-    { expiresIn: Number(process.env.REFRESH_TOKEN_EXPIRY) }
+    config.refreshTokenSecret,
+    { expiresIn: config.refreshTokenExpiry }
   );
 };
 

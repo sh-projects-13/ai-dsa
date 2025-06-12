@@ -1,7 +1,8 @@
 import arcjet, { validateEmail } from "@arcjet/node";
+import { config } from "../conf/config";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY!,
+  key: config.arcjetKey,
   rules: [
     validateEmail({
       mode: "LIVE",

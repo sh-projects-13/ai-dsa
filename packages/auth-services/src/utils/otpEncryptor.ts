@@ -1,8 +1,9 @@
 import crypto from "crypto";
+import { config } from "../conf/config";
 
 const ENCRYPTION_KEY =
-  process.env.OTP_ENCRYPTION_KEY || "0123456789abcdef0123456789abcdef";
-const IV = process.env.OTP_ENCRYPTION_IV || "abcdef9876543210";
+  config.encryptionKey || "0123456789abcdef0123456789abcdef";
+const IV = config.encryptionIV || "abcdef9876543210";
 
 const algorithm = "aes-256-cbc";
 

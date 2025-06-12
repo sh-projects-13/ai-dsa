@@ -3,6 +3,7 @@ import {
   checkIfUnverifiedUserExistsService,
   checkIfUsernameisAvailibleService,
   checkIfVerifiedUserExistsService,
+  deleteRefreshTokenService,
   getUnverifiedUserDataService,
   getVerifiedUserDataByEmailService,
   unverifiedUserRegisterService,
@@ -15,6 +16,7 @@ import jwt from "jsonwebtoken";
 import { aj } from "../utils/arcjet";
 import { generateAccessAndRefereshTokens } from "../utils/jwtTokens";
 import { sendNewUserOtpEmail } from "../utils/email";
+import { config } from "../conf/config";
 
 interface iRegisterUser {
   name: string;
@@ -56,7 +58,7 @@ export const checkUserAlreadyLogin: RequestHandler = async (req, res) => {
     res.status(302).json({ isLoggedIn: false, message: "User not logged in" });
   }
 
-  const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!);
+  const decodedToken = jwt.verify(token, config.accessTokenSecret);
 
   res.status(200).json({
     message: "User already logged in",
@@ -243,4 +245,16 @@ export const loginUser: RequestHandler = async (
       user: loggedInUser,
       message: "User logged In Successfully",
     });
+};
+
+export const logoutUser: RequestHandler = async (req, res) => {
+  const token =
+    req.cookies?.accessToken || req.header("Authorization")?.split(" ")[1];
+  const userData = jwt.decode(token) as { id: string };
+  await deleteRefreshTokenService(userData.id);
+  res
+    .status(200)
+    .clearCookie("accessToken")
+    .clearCookie("refreshToken")
+    .json({ message: "User logged out successfully." });
 };
