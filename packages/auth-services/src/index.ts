@@ -20,7 +20,7 @@ app.use(express.json());
 // Routes
 import authRoutes from "./routes/auth.route";
 
-app.use("/api/auth", authRoutes);
+app.use("/api/v1/auth", authRoutes);
 
 app.use(errorHandler);
 
