@@ -3,6 +3,7 @@ import {
   checkIfUnverifiedUserExistsService,
   checkIfUsernameisAvailibleService,
   checkIfVerifiedUserExistsService,
+  deleteRefreshTokenService,
   getUnverifiedUserDataService,
   getVerifiedUserDataByEmailService,
   unverifiedUserRegisterService,
@@ -243,4 +244,16 @@ export const loginUser: RequestHandler = async (
       user: loggedInUser,
       message: "User logged In Successfully",
     });
+};
+
+export const logoutUser: RequestHandler = async (req, res) => {
+  const token =
+    req.cookies?.accessToken || req.header("Authorization")?.split(" ")[1];
+  const userData = jwt.decode(token) as { id: string };
+  await deleteRefreshTokenService(userData.id);
+  res
+    .status(200)
+    .clearCookie("accessToken")
+    .clearCookie("refreshToken")
+    .json({ message: "User logged out successfully." });
 };
