@@ -1,9 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import { setupProxies } from './proxy';
+import { PORT } from './config';
 
 const app = express();
-const PORT = process.env.API_GATEWAY_PORT || 4000;
 
 app.use(cors());
 app.use(express.json());
