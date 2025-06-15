@@ -9,7 +9,23 @@ function getEnv(key: string, required = true): string {
   return value!;
 }
 
-export const config = {
+interface iConfig {
+  port: number;
+  databaseUrl: string;
+  corsOrigin: string;
+  arcjetKey: string;
+  queueServiceUrl: string;
+  passwordSalt: number;
+  accessTokenSecret: string;
+  accessTokenExpiry: string;
+  refreshTokenSecret: string;
+  refreshTokenExpiry: string;
+  encryptionKey: string;
+  encryptionIV: string;
+  maxOtpRequestsPerDay: number;
+}
+
+export const config: iConfig = {
   port: parseInt(getEnv("AUTH_SERVICE_PORT")),
   databaseUrl: getEnv("DATABASE_URL"),
   corsOrigin: getEnv("CORS_ORIGIN"),
@@ -17,12 +33,10 @@ export const config = {
   queueServiceUrl: getEnv("QUEUE_SERVICE_URL"),
   passwordSalt: parseInt(getEnv("PASSWORD_SALT")),
   accessTokenSecret: getEnv("ACCESS_TOKEN_SECRET"),
-  accessTokenExpiry: parseInt(getEnv("ACCESS_TOKEN_EXPIRY")),
+  accessTokenExpiry: getEnv("ACCESS_TOKEN_EXPIRY"),
   refreshTokenSecret: getEnv("REFRESH_TOKEN_SECRET"),
-  refreshTokenExpiry: parseInt(getEnv("REFRESH_TOKEN_EXPIRY")),
+  refreshTokenExpiry: getEnv("REFRESH_TOKEN_EXPIRY"),
   encryptionKey: getEnv("OTP_ENCRYPTION_KEY"),
   encryptionIV: getEnv("OTP_ENCRYPTION_IV"),
   maxOtpRequestsPerDay: parseInt(getEnv("MAX_OTP_REQUESTS_PER_DAY")),
 };
-
-export type ConfigSchema = typeof config;

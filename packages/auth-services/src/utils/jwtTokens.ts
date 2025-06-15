@@ -10,6 +10,8 @@ interface iUser {
   username: string;
 }
 
+type StringValue = `${number}d`;
+
 // Generate JWT tokens
 
 // access token
@@ -22,7 +24,7 @@ const generateAccessToken = (user: iUser) => {
       username: user.username,
     },
     config.accessTokenSecret,
-    { expiresIn: config.accessTokenExpiry }
+    { expiresIn: config.accessTokenExpiry as StringValue }
   );
 };
 
@@ -33,7 +35,7 @@ const generateRefreshToken = (id: string) => {
       id: id,
     },
     config.refreshTokenSecret,
-    { expiresIn: config.refreshTokenExpiry }
+    { expiresIn: config.refreshTokenExpiry as StringValue }
   );
 };
 
