@@ -13,7 +13,7 @@ export const unverifiedUsers = pgTable("unverified-users", {
   name: varchar("name", { length: 255 }).notNull(),
   username: varchar("username", { length: 255 }).notNull().unique(),
   password_hash: varchar("password_hash", { length: 255 }).notNull(),
-  otp_hash: varchar("password_hash", { length: 255 }).notNull(),
+  otp_hash: varchar("otp_hash", { length: 255 }).notNull(),
   created_at: timestamp("created_at").notNull().defaultNow(),
   updated_at: timestamp("updated_at").notNull().defaultNow(),
 });

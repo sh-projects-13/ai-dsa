@@ -4,8 +4,10 @@ import {
   checkIfUsernameisAvailibleService,
   checkIfVerifiedUserExistsService,
   deleteRefreshTokenService,
+  deleteUnverifiedUserService,
   getUnverifiedUserDataService,
   getVerifiedUserDataByEmailService,
+  getVerifiedUserDataByUsernameService,
   unverifiedUserRegisterService,
   verifiedUserRegistrationService,
 } from "../services/auth.service";
@@ -49,13 +51,13 @@ interface iLoginUser {
 
 // Check if User Already Logged in
 export const checkUserAlreadyLogin: RequestHandler = async (req, res) => {
-  const token =
-    req.cookies?.accessToken ||
-    req.header("Authorization")?.replace("Bearer ", "");
+  // console.log(req.cookies);
+  const token = req.cookies?.accessToken;
 
   // console.log(token);
   if (!token) {
     res.status(302).json({ isLoggedIn: false, message: "User not logged in" });
+    return;
   }
 
   const decodedToken = jwt.verify(token, config.accessTokenSecret);
@@ -68,23 +70,29 @@ export const checkUserAlreadyLogin: RequestHandler = async (req, res) => {
 };
 
 // Check if Username is Available
-export const checkUsernameAvailability: RequestHandler = async (
-  req: Request,
-  res: Response
-) => {
+export const checkUsernameAvailability: RequestHandler = async (req, res) => {
   const { username } = req.body;
-  // const username = req.body.username;
 
   if (!username) {
     res.status(400).json({ message: "Username is required." });
+    return;
+  }
+
+  const isAlphanumeric = /^[a-zA-Z0-9]+$/.test(username);
+
+  if (!isAlphanumeric) {
+    res.status(400).json({ message: "Username must be alphanumeric." });
+    return;
   }
 
   const isUsernameAvailable = await checkIfUsernameisAvailibleService(username);
 
   if (isUsernameAvailable) {
     res.status(200).json({ message: "Username is available." });
+    return;
   } else {
     res.status(400).json({ message: "Username is not available." });
+    return;
   }
 };
 
@@ -94,15 +102,16 @@ export const checkValidEmail: RequestHandler = async (req, res) => {
 
   if (!email) {
     res.status(400).json({ message: "Email is required." });
+    return;
   }
 
   const emailDecision = await aj.protect(req, { email });
   console.log(emailDecision);
 
-  if (emailDecision) {
-    res.status(200).json({ validEmail: true, message: "Email is valid." });
-  } else {
+  if (emailDecision.isDenied()) {
     res.status(400).json({ validEmail: false, message: "Email is not valid." });
+  } else {
+    res.status(200).json({ validEmail: true, message: "Email is valid." });
   }
 };
 
@@ -115,21 +124,24 @@ export const registerUnverifiedUser: RequestHandler = async (
 
   if (!name || !email || !password || !username) {
     res.status(400).json({ message: "All fields are required." });
+    return;
   }
 
   if (await checkIfVerifiedUserExistsService(email)) {
     res.status(400).json({ message: "User already exists." });
+    return;
   }
 
   if (await checkIfUnverifiedUserExistsService(email)) {
     res
       .status(400)
       .json({ message: "Please check your email and verify yourself." });
+    return;
   }
 
   const hashedPassword = await hashData(password);
   const otp = randomInt(100000, 999999).toString();
-  const otp_hash = await hashData(otp);
+  const otpHash = await hashData(otp);
 
   const newUnverifiedUser: iUnverifiedUser =
     await unverifiedUserRegisterService(
@@ -137,7 +149,7 @@ export const registerUnverifiedUser: RequestHandler = async (
       name,
       username,
       hashedPassword,
-      otp_hash
+      otpHash
     );
 
   const otpUrl = encodeOtpId(newUnverifiedUser.id);
@@ -161,11 +173,13 @@ export const verifyOtpAndRegisterVerifiedUser: RequestHandler = async (
   const { otpId } = req.params;
   if (!otpId) {
     res.status(404).json({ message: "Page not found" });
+    return;
   }
 
   const { email, otp } = req.body;
   if (!email || !otp) {
     res.status(400).json({ message: "All fields are required." });
+    return;
   }
 
   const decodedOtpId = decodeOtpId(otpId);
@@ -175,17 +189,22 @@ export const verifyOtpAndRegisterVerifiedUser: RequestHandler = async (
     res.status(401).json({
       message: "Invalid request. Please make sure you are on the correct url.",
     });
+    return;
   }
 
   const unverifiedUser = unverifiedUserData[0];
 
   if (unverifiedUser.email !== email) {
     res.status(400).json({ message: "Incorrect email." });
+    return;
   }
 
   if (!(await verifyHashedData(otp, unverifiedUser.otp_hash))) {
     res.status(400).json({ message: "Incorrect OTP." });
+    return;
   }
+
+  await deleteUnverifiedUserService(unverifiedUser.id);
 
   await verifiedUserRegistrationService(
     unverifiedUser.email,
@@ -206,20 +225,23 @@ export const loginUser: RequestHandler = async (
 
   if (!identifier || !password) {
     res.status(400).json({ message: "All fields are required." });
+    return;
   }
 
   const identifierIsEmail = identifier.includes("@");
 
   const user = identifierIsEmail
     ? await getVerifiedUserDataByEmailService(identifier)
-    : await getVerifiedUserDataByEmailService(identifier);
+    : await getVerifiedUserDataByUsernameService(identifier);
 
   if (!user) {
     res.status(404).json({ message: "User not found." });
+    return;
   }
 
   if (!(await verifyHashedData(password, user.password_hash))) {
     res.status(400).json({ message: "Incorrect password." });
+    return;
   }
 
   const { accessToken, refreshToken } =

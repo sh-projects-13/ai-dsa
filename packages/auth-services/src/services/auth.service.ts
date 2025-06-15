@@ -42,13 +42,22 @@ export const verifiedUserRegistrationService = async (
   return newVerifiedUser[0];
 };
 
+// Delete Unverified user
+export const deleteUnverifiedUserService = async (id: string) => {
+  await db.delete(unverifiedUsers).where(eq(unverifiedUsers.id, id));
+};
+
 // Check if username exists in the database
 export const checkIfUsernameisAvailibleService = async (username: string) => {
-  const existingUsers = await db
+  const existingUnverifiedUsers = await db
     .select()
     .from(unverifiedUsers)
     .where(eq(unverifiedUsers.username, username));
-  return existingUsers.length === 0;
+  const existingUsers = await db
+    .select()
+    .from(users)
+    .where(eq(users.username, username));
+  return existingUsers.length === 0 && existingUnverifiedUsers.length === 0;
 };
 
 // Check if user exists as unverified user
@@ -66,7 +75,7 @@ export const checkIfVerifiedUserExistsService = async (email: string) => {
     .select()
     .from(users)
     .where(eq(users.email, email));
-  return existingVerifiedUsers.length === 0;
+  return existingVerifiedUsers.length > 0;
 };
 
 // Get unverified user data
