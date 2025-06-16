@@ -357,6 +357,24 @@ importers:
         specifier: ^5.0.0
         version: 5.8.3
 
+  packages/user-profile:
+    devDependencies:
+      '@types/express':
+        specifier: ^5.0.3
+        version: 5.0.3
+      '@types/typescript':
+        specifier: ^2.0.0
+        version: 2.0.0
+      dotenv:
+        specifier: ^16.5.0
+        version: 16.5.0
+      express:
+        specifier: ^5.1.0
+        version: 5.1.0
+      typescript:
+        specifier: ^5.8.3
+        version: 5.8.3
+
 packages:
 
   '@arcjet/analyze-wasm@1.0.0-beta.8':
@@ -1307,6 +1325,10 @@ packages:
 
   '@types/tinycolor2@1.4.6':
     resolution: {integrity: sha512-iEN8J0BoMnsWBqjVbWH/c0G0Hh7O21lpR2/+PrvAVgWdzL7eexIFm4JN/Wn10PTcmNdtS6U67r499mlWMXOxNw==}
+
+  '@types/typescript@2.0.0':
+    resolution: {integrity: sha512-WMEWfMISiJ2QKyk5/dSdgL0ZwP//PZj0jmDU0hMh51FmLq4WIYzjlngsUQZXejQL+QtkXJUOGjb3G3UCvgZuSQ==}
+    deprecated: This is a stub types definition for TypeScript (https://github.com/Microsoft/TypeScript). TypeScript provides its own type definitions, so you don't need @types/typescript installed!
 
   '@typescript-eslint/eslint-plugin@8.33.0':
     resolution: {integrity: sha512-CACyQuqSHt7ma3Ns601xykeBK/rDeZa3w6IS6UtMQbixO5DWy+8TilKkviGDH6jtWCo8FGRKEK5cLLkPvEammQ==}
@@ -4567,6 +4589,10 @@ snapshots:
       '@types/node': 22.15.31
 
   '@types/tinycolor2@1.4.6': {}
+
+  '@types/typescript@2.0.0':
+    dependencies:
+      typescript: 5.8.3
 
   '@typescript-eslint/eslint-plugin@8.33.0(@typescript-eslint/parser@8.33.0(eslint@9.28.0)(typescript@5.8.3))(eslint@9.28.0)(typescript@5.8.3)':
     dependencies:
