@@ -6,7 +6,7 @@ interface MailOptions {
     html: string;
 }
 
-export const sendOtpEmail = async ({ to, subject, html }: MailOptions) => {
+export const sendEmail = async ({ to, subject, html }: MailOptions) => {
     const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
         port: parseInt(process.env.SMTP_PORT || "587"),

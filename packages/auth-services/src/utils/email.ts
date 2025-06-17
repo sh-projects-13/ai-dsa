@@ -2,8 +2,11 @@ import axios from "axios";
 import { config } from "../conf/config";
 
 interface iVerificationEmailOtpData {
-  email: String;
-  otp: String;
+    email: String;
+    otp: String;
+}
+interface iWelcomeEmailData {
+    email: String;
 }
 
 // export const sendNewUserOtpEmail = async (
@@ -25,13 +28,19 @@ interface iVerificationEmailOtpData {
 // };
 
 export const sendNewUserOtpEmail = async (
-  emailData: iVerificationEmailOtpData
+    emailData: iVerificationEmailOtpData
 ) => {
-  console.log(emailData);
+    console.log(emailData);
 };
 
 export const sendForgotPasswordOtpEmail = async (
-  emailData: iVerificationEmailOtpData
+    emailData: iVerificationEmailOtpData
 ) => {
-  console.log(emailData);
+    console.log(emailData);
+};
+
+// title should be "welcome-email" and should be present for the queue service to process it
+
+export const sendWelcomeEmail = async (emailData: iWelcomeEmailData) => {
+    console.log(emailData);
 };
