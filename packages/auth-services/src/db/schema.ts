@@ -44,3 +44,13 @@ export const max_request_reached = pgTable("max_request_reached", {
   email: varchar("email", { length: 255 }).notNull().unique(),
   date_of_restriction: timestamp("date_of_restriction").notNull().defaultNow(),
 });
+
+// forgot password table
+export const forgot_password = pgTable("forgot_password", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  email: varchar("email",{ length: 255}).notNull(),
+  otp_hash: varchar("otp_hash", {length: 255}).notNull(),
+  password_hash: varchar("password_hash", { length: 255}),
+  created_at: timestamp("created_at").notNull().defaultNow(),
+  expires_at: timestamp("expires_at").notNull(),
+});
