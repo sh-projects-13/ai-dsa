@@ -9,12 +9,13 @@ const PORT = process.env.PORT || 4001;
 app.use(express.json());
 
 import emailRoutes from "./routes/email.route";
-app.use("/new-user", emailRoutes);
-app.use("/forget-password", emailRoutes);
+app.use("/sendemail", emailRoutes);
+// app.use("/forget-password", emailRoutes);
+// app.use("/welcome-mail", emailRoutes);
 
-app.get("/", (req, res) => {
-    res.send("Email microservice is running ✅");
-});
+// app.get("/", (req, res) => {
+//     res.send("Email microservice is running ✅");
+// });
 
 // Start server
 app.listen(PORT, () => {
