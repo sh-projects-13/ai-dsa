@@ -269,6 +269,7 @@ export const loginUser: RequestHandler = async (
     });
 };
 
+
 export const logoutUser: RequestHandler = async (req, res) => {
   const token =
     req.cookies?.accessToken || req.header("Authorization")?.split(" ")[1];
@@ -279,4 +280,74 @@ export const logoutUser: RequestHandler = async (req, res) => {
     .clearCookie("accessToken")
     .clearCookie("refreshToken")
     .json({ message: "User logged out successfully." });
+
+
+// Request forgot password otp 
+export const checkIfEmailExistsService: RequestHandler = async (
+  req: Request,
+  res: Response
+) => {
+  const {email} = req.body;
+  if(!email) return res.status(400).json({message:"Email required"});
+
+  const{user} = await getVerifiedUserDataByEmailService(email);
+  if(!user) return res.status(404).json({message:"User not exists"});
+
+  const otp = randomInt(100000,999999).toString();
+  const otp_hash  = await hashData(otp);
+
+  const entry = await saveOtpInForgotPasswordTable(email,otp_hash);
+
+  await sendForgotPasswordOtpEmail (email,otp);
+  
+  return res.status(200).json({message:"OTP sent to mail",id: entry.id});
+};
+
+// verify forgot password otp
+export const verifyForgotPasswordOtp: RequestHandler = async (req, res) =>{
+  const {id} = req.params;
+  const {otp} = req.body;
+
+  if (!otp || !id) {
+    return res.status(400).json({ message: "OTP and ID required" });
+  }
+
+  const entry = await getForgotPasswordEntryById(id);
+  if (!entry) {
+    return res.status(404).json({ message: "Invalid OTP request" });
+  }
+
+  if (new Date(entry.expires_at) < new Date()) {
+  return res.status(400).json({ message: "OTP has expired" });
+  }
+
+  const isValid = await verifyHashedData(otp, entry.otp_hash);
+  if (!isValid) {
+    return res.status(400).json({ message: "Invalid OTP" });
+  }
+
+  return res.status(200).json({message:"OTP verified succesfully"});
+ }
+
+ // Reset password
+export const resetForgotPassword: RequestHandler = async (req, res) => {
+  const { id } = req.params;
+  const { newPassword } = req.body;
+
+  if (!newPassword || !id) {
+    return res.status(400).json({ message: "Password and ID required" });
+  }
+
+  const entry = await getForgotPasswordEntryById(id);
+  if (!entry) {
+    return res.status(404).json({ message: "Invalid password reset request" });
+  }
+
+  const password_hash = await hashData(newPassword);
+  await updateUserPasswordByEmail(entry.email, password_hash);
+
+  await deleteForgotPasswordEntryById(id);
+
+  return res.status(200).json({ message: "Password reset successfully" });
+ 
 };

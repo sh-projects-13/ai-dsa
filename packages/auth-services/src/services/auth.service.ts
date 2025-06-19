@@ -1,6 +1,16 @@
 import { eq } from "drizzle-orm";
 import { db } from "../db";
+<<<<<<< HEAD
 import { unverifiedUsers, users } from "../db/schema";
+=======
+import {
+  unverifiedUsers,
+  users,
+  rate_limits,
+  max_request_reached,
+  forgot_password,
+} from "../db/schema";
+>>>>>>> forgot_pasword
 
 // Unverified User Registration into the DB
 export const unverifiedUserRegisterService = async (
@@ -119,3 +129,47 @@ export const updateRefreshandAccessTokenService = async (
 export const deleteRefreshTokenService = async (id: string) => {
   await db.update(users).set({ refreshToken: "" }).where(eq(users.id, id));
 };
+
+// save otp in forgot password table
+export const saveOtpInForgotPasswordTable = async (
+  email: string,
+  otp_hash: string
+) => {
+  const entry = await db
+    .insert(forgot_password)
+    .values({
+      email,
+      otp_hash,
+      expires_at: new Date(Date.now() + 15 * 60 * 1000),
+    })
+    .returning();
+  return entry[0];
+};
+
+// get forgot password by entry
+export const getForgotPasswordEntryById = async (id: string) => {
+  const entry = await db
+    .select()
+    .from(forgot_password)
+    .where(eq(forgot_password.id, id));
+  return entry[0];
+};
+
+// update password in user table
+export const updateUserPasswordByEmail = async (
+  email: string,
+  password_hash: string
+) => {
+  await db
+    .update(users)
+    .set({ password_hash })
+    .where(eq(users.email, email));
+};
+
+// delete entry in forgot password table by id
+export const deleteForgotPasswordEntryById = async (id: string) => {
+  await db
+    .delete(forgot_password)
+    .where(eq(forgot_password.id, id));
+};
+
